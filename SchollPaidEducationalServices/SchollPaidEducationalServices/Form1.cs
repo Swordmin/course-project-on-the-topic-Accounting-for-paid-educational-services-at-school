@@ -1,21 +1,25 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using ComboBox = System.Windows.Forms.ComboBox;
 
 namespace SchollPaidEducationalServices
 {
     public partial class Form1 : Form
     {
+
+        private string _value1;
+        private string _value2;
+        private string _value3;
+        private string _value4;
+
+        private DataTable _table;
+        private MySqlConnection _mycon;
+        private MySqlCommand _mycom;
+        private string _connectData = "Server=localhost;Database=ychet;Uid=root;pwd=12345";
+        private DataSet ds;
+
         public Form1()
         {
             InitializeComponent();
@@ -31,30 +35,28 @@ namespace SchollPaidEducationalServices
                 {
 
 
-                    string script = ($"DELETE FROM statement WHERE ID = {value2} ");
+                    string script = ($"DELETE FROM statement WHERE ID = {_value2} ");
                     MSDataFill(script, _connectData, dataGridView1);
                 }
             }
             catch { MessageBox.Show("Неверно введены данные"); }
         }
-        private DataTable _table;
-        public MySqlConnection _mycon;
-        public MySqlCommand _mycom;
-        private string _connectData = "Server=localhost;Database=ychet;Uid=root;pwd=12345";
-        public DataSet ds;
 
         private void Initialization()
         {
             _mycon = GetDBConnection();
             _table = new DataTable();
-            string  script = "Select id,fullname as ФИО,subject as Предмет from teachers";
+
+            string script = "Select id,fullname as ФИО,subject as Предмет from teachers";
             string script2 = "Select id,fullnameparents as ФИОродителя,fullnamechildren as ФИОученика,subject as предмет,class as класс,date as дата,address as адрес,phone as телефон from statement";
             string script4 = "Select service.id,service.title as Название, service.priceperlesson as Цена_за_занятие, service.thedateofthe as Дата_проведения, service.numberofclasses as количество_занятий,teachers.fullname as ФИО, `Groups`.numbergroups as Номер_группы  from service join teachers on teachers.id = service.teachers join `Groups` on `Groups`.id = service.groups_ID";
             string script3 = "Select  `Groups`.id, `Groups`.numberstudents as Номер_Студента, `Groups`.numbergroups as Номер_группы, statement.fullnamechildren as ФИО_ученика  from `Groups` join statement on  `Groups`.FullNameStudents = statement.id";
+           
             MSDataFill(script3, _connectData, dataGridView2);
             MSDataFill(script4, _connectData, dataGridView4);
             MSDataFill(script, _connectData, dataGridView6);
             MSDataFill(script2, _connectData, dataGridView1);
+
             dataGridView6.Columns[0].Visible = false;
             dataGridView1.Columns[0].Visible = false;
             dataGridView4.Columns[0].Visible = false;
@@ -63,19 +65,6 @@ namespace SchollPaidEducationalServices
             MSAdapter($"SELECT ID  FROM `Groups` WHERE numbergroups='{comboBox11.Text}'", comboBox12, "id", "id"); //Это для услуг
             MSAdapter($"SELECT ID  FROM teachers WHERE fullname='{comboBox8.Text}'", comboBox9, "id", "id");
 
-            //MSDataAdapterFill("SELECT ID,fullnameChildren  FROM statement", comboBox3, _table, "fullnameChildren", "id");
-
-            //const string connStr1 = "Server=localhost;Database=YCHET;Uid=root;pwd=12345;charset=utf8";
-            //DataTable patientTable = new DataTable();
-            //MySqlConnection myConnection = new MySqlConnection(connStr1);
-            //{
-            //    MySqlCommand command = new MySqlCommand("SELECT ID,fullnamechildren  FROM statement", myConnection);
-            //    MySqlDataAdapter adapter = new MySqlDataAdapter(command);
-            //    adapter.Fill(patientTable);
-            //}
-            //comboBox3.DataSource = patientTable;
-            //comboBox3.DisplayMember = "fullnamechildren";
-            //comboBox3.ValueMember = "id";
             Adapter(comboBox3,"SELECT ID,fullnamechildren  FROM statement", "fullnamechildren","id");//Группы
 
             Adapter(comboBox8, "SELECT ID,fullname  FROM teachers", "fullname", "id");//Услуги
@@ -123,10 +112,6 @@ namespace SchollPaidEducationalServices
 
             return SqlConnection;
         }
-        public string value1;
-        public string value2;
-        public string value3;
-        public string value4;
         private void MSDataFill(string script, string connect, DataGridView dataGridView)
         {
             try
@@ -147,13 +132,9 @@ namespace SchollPaidEducationalServices
         private void button23_Click(object sender, EventArgs e)
         {
                       
-            
-                string script = "Select id,fullname as ФИО,subject as Предмет from teachers";
-                MSDataFill(script, _connectData, dataGridView6);
+            string script = "Select id,fullname as ФИО,subject as Предмет from teachers";
+            MSDataFill(script, _connectData, dataGridView6);
             dataGridView6.Columns[0].Visible = false;
-            //MSDataAdapterFill("SELECT ID,Class  FROM Class", comboBox25, _table, "id", "Class");
-
-
 
         }
 
@@ -187,6 +168,7 @@ namespace SchollPaidEducationalServices
                 MySqlDataAdapter adapter = new MySqlDataAdapter(command);
                 adapter.Fill(patientTable);
             }
+
             comboBox3.DataSource = patientTable;
             comboBox3.DisplayMember = "fullnamechildren";
             comboBox3.ValueMember = "id";
@@ -213,7 +195,7 @@ namespace SchollPaidEducationalServices
 
         private void dataGridView6_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            value1 = dataGridView6.Rows[e.RowIndex].Cells[0].Value.ToString();
+            _value1 = dataGridView6.Rows[e.RowIndex].Cells[0].Value.ToString();
             textBox7.Text = dataGridView6.Rows[e.RowIndex].Cells[1].Value.ToString();
             textBox8.Text = dataGridView6.Rows[e.RowIndex].Cells[2].Value.ToString();
 
@@ -228,7 +210,7 @@ namespace SchollPaidEducationalServices
                 {
 
 
-                    string script = ($"DELETE FROM teachers WHERE ID = {value1} ");
+                    string script = ($"DELETE FROM teachers WHERE ID = {_value1} ");
                     MSDataFill(script, _connectData, dataGridView6);
                 }
             }
@@ -240,7 +222,7 @@ namespace SchollPaidEducationalServices
         {
             try
             {
-                string script = ($"UPDATE teachers SET  fullname='{textBox7.Text}',subject='{textBox8.Text}' WHERE ID = {value1} ");
+                string script = ($"UPDATE teachers SET  fullname='{textBox7.Text}',subject='{textBox8.Text}' WHERE ID = {_value1} ");
                 MSDataFill(script, _connectData, dataGridView5);
             }
             catch { MessageBox.Show("Неверно введены данные"); }
@@ -312,7 +294,7 @@ namespace SchollPaidEducationalServices
         private void dataGridView1_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             string pablo = dateTimePicker1.Value.ToString("yyyy-MM-dd");
-            value2 = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            _value2 = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
             textBox1.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
             textBox2.Text = dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
             textBox3.Text = dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString();
@@ -334,7 +316,7 @@ namespace SchollPaidEducationalServices
             try
             {
                 string pablo = dateTimePicker1.Value.ToString("yyyy-MM-dd");
-                string script = ($"UPDATE statement SET fullnameparents = '{textBox1.Text}',fullnamechildren = '{textBox2.Text}', subject = '{textBox3.Text}',class = '{textBox4.Text}',date = '{pablo}',address = '{textBox5.Text}',phone = '{textBox6.Text}', WHERE ID = {value2} ");
+                string script = ($"UPDATE statement SET fullnameparents = '{textBox1.Text}',fullnamechildren = '{textBox2.Text}', subject = '{textBox3.Text}',class = '{textBox4.Text}',date = '{pablo}',address = '{textBox5.Text}',phone = '{textBox6.Text}', WHERE ID = {_value2} ");
                 MSDataFill(script, _connectData, dataGridView1);
             }
             catch { MessageBox.Show("Неверно введены данные"); }
@@ -380,7 +362,7 @@ namespace SchollPaidEducationalServices
                 {
 
 
-                    string script = ($"DELETE FROM `Groups` WHERE ID = {value3} ");
+                    string script = ($"DELETE FROM `Groups` WHERE ID = {_value3} ");
                     MSDataFill(script, _connectData, dataGridView2);
                 }
             }
@@ -389,7 +371,7 @@ namespace SchollPaidEducationalServices
 
         private void dataGridView2_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            value3 = dataGridView2.Rows[e.RowIndex].Cells[0].Value.ToString();
+            _value3 = dataGridView2.Rows[e.RowIndex].Cells[0].Value.ToString();
             textBox15.Text = dataGridView2.Rows[e.RowIndex].Cells[1].Value.ToString();
             textBox16.Text = dataGridView2.Rows[e.RowIndex].Cells[2].Value.ToString();
             comboBox3.Text = dataGridView2.Rows[e.RowIndex].Cells[3].Value.ToString();
@@ -398,7 +380,7 @@ namespace SchollPaidEducationalServices
 
         private void button5_Click(object sender, EventArgs e)
         {
-            string script = ($"UPDATE `Groups` SET numberstudents = '{textBox15.Text}',numbergroups = '{textBox16.Text}', FullNameStudents = '{comboBox10.Text}'  WHERE ID = {value3} ");
+            string script = ($"UPDATE `Groups` SET numberstudents = '{textBox15.Text}',numbergroups = '{textBox16.Text}', FullNameStudents = '{comboBox10.Text}'  WHERE ID = {_value3} ");
             MSDataFill(script, _connectData, dataGridView2);
         }
 
@@ -429,7 +411,7 @@ namespace SchollPaidEducationalServices
                 {
 
 
-                    string script = ($"DELETE FROM Service WHERE ID = {value4} ");
+                    string script = ($"DELETE FROM Service WHERE ID = {_value4} ");
                     MSDataFill(script, _connectData, dataGridView4);
                 }
             }
@@ -439,7 +421,7 @@ namespace SchollPaidEducationalServices
         private void dataGridView4_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             string pablo = dateTimePicker3.Value.ToString("yyyy-MM-dd");
-            value4 = dataGridView4.Rows[e.RowIndex].Cells[0].Value.ToString();
+            _value4 = dataGridView4.Rows[e.RowIndex].Cells[0].Value.ToString();
             textBox9.Text = dataGridView4.Rows[e.RowIndex].Cells[1].Value.ToString();
             textBox11.Text = dataGridView4.Rows[e.RowIndex].Cells[2].Value.ToString();
             pablo = dataGridView4.Rows[e.RowIndex].Cells[3].Value.ToString();
@@ -451,7 +433,7 @@ namespace SchollPaidEducationalServices
         private void button13_Click(object sender, EventArgs e)
         {
             string pablo = dateTimePicker3.Value.ToString("yyyy-MM-dd");
-            string script = ($"Update service set title='{textBox9.Text}',priceperlesson={textBox11.Text},thedateofthe='{pablo}',numberofclasses={textBox12.Text},teachers={comboBox9.Text},groups_id={comboBox12.Text} where id = {value4}");
+            string script = ($"Update service set title='{textBox9.Text}',priceperlesson={textBox11.Text},thedateofthe='{pablo}',numberofclasses={textBox12.Text},teachers={comboBox9.Text},groups_id={comboBox12.Text} where id = {_value4}");
             MSDataFill(script, _connectData, dataGridView4);
         }
 
